@@ -1,6 +1,7 @@
 import pygame
-import random
 from os import path
+from player import Player
+from enemies import Enemies
 
 # Frozen Jam от tgfcoder <https://twitter.com/tgfcoder>
 # под лицензией CC-BY-3 <http://creativecommons.org/licenses/by/3.0/>
@@ -9,14 +10,13 @@ snd_dir = path.join(path.dirname(__file__), "sounds")
 WIDTH = 600
 HEIGHT = 750
 FPS = 60
-# Задаем цвета
+# set color
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
-
 
 flags = pygame.SHOWN
 pygame.init()
@@ -39,7 +39,7 @@ def draw_text(surf, text, size, x, y):
 
 
 def newenemies():
-    e = Enemies()
+    e = Enemies(HEIGHT, enemies_img)
     all_sprites.add(e)
     enemies.add(e)
 
@@ -47,73 +47,13 @@ def newenemies():
 def draw_shield_bar(surf, x, y, pct):
     if pct < 0:
         pct = 0
-    BAR_LENGTH = 100
-    BAR_HEIGHT = 10
-    fill = (pct / 100) * BAR_LENGTH
-    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
-    pygame.draw.rect(surf, GREEN, fill_rect)
+    bar_length = 100
+    bar_height = 10
+    fill = (pct / 100) * bar_length
+    outline_rect = pygame.Rect(x, y, bar_length, bar_height)
+    fill_rect = pygame.Rect(x, y, fill, bar_height)
+    pygame.draw.rect(surf, RED, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.shield = 100
-        self.image = player_img
-        self.image.set_colorkey(BLACK)
-        self.rect = self.image.get_rect()
-        self.radius = 40
-        # pygame.draw.circle(self.image, RED, self.rect.center, self.radius, 2)
-        self.rect.centerx = WIDTH // 2
-        self.rect.bottom = HEIGHT - 10
-        self.speedx = 0
-        self.shoot_delay = 150
-        self.last_shoot = pygame.time.get_ticks()
-
-    def update(self):
-        self.speedx = 0
-        key = pygame.key.get_pressed()
-        pressed = pygame.mouse.get_pressed()
-        if pressed[0]:
-            self.shoots()
-        if key[pygame.K_a] or key[pygame.K_LEFT]:
-            self.speedx = -9
-        if key[pygame.K_RIGHT] or key[pygame.K_d]:
-            self.speedx = +9
-        if key[pygame.K_SPACE]:
-            self.shoots()
-        self.rect.x += self.speedx
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-        if self.rect.left < 0:
-            self.rect.left = 0
-
-    def shoots(self):
-        now = pygame.time.get_ticks()
-        if now - self.last_shoot > self.shoot_delay:
-            self.last_shoot = now
-            bullet = Bullet(self.rect.centerx, self.rect.top)
-            all_sprites.add(bullet)
-            bullets.add(bullet)
-            shoot_sound.play().set_volume(0.15)
-
-
-class Enemies(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = enemies_img
-        self.image = pygame.transform.rotate(self.image, 180)
-        self.image.set_colorkey((255, 255, 255))
-        self.rect = self.image.get_rect(center=(random.randint(50, 550), 0))
-        self.rect.y = random.randrange(-100, 40)
-        self.speed_y = random.randrange(1, 4)
-
-    def update(self):
-        self.rect.y += self.speed_y
-        if self.rect.top > HEIGHT:
-            self.rect.x = random.randrange(50, 550)
-            self.rect.y = random.randrange(1, 4)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -145,7 +85,7 @@ pygame.mixer.music.play(loops=-1)
 all_sprites = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-player = Player()
+player = Player(BLACK, WIDTH, HEIGHT, player_img, all_sprites, shoot_sound, bullets, Bullet)
 all_sprites.add(player)
 for i in range(12):
     newenemies()
