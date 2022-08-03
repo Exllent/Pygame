@@ -1,17 +1,19 @@
 import pygame
+from params import *
+from images import Images
+from bullet import Bullet
+from sounds import shoot_sound
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, BLACK, WIDTH, HEIGHT, player_img, all_sprites, shoot_sound, bullets, Bullet):
+class Player(pygame.sprite.Sprite, Images):
+    def __init__(self, all_sprites, bullets):
         pygame.sprite.Sprite.__init__(self)
         self.all_sprites = all_sprites
         self.shoot_sound = shoot_sound
         self.bullets = bullets
-        self.WIDTH = WIDTH
-        self.Bullet = Bullet
         self.speed_x = None
         self.shield = 100
-        self.image = player_img
+        self.image = self.player_img
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 40
@@ -34,8 +36,8 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_SPACE]:
             self.shoots()
         self.rect.x += self.speed_x
-        if self.rect.right > self.WIDTH:
-            self.rect.right = self.WIDTH
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
 
@@ -43,7 +45,7 @@ class Player(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if now - self.last_shoot > self.shoot_delay:
             self.last_shoot = now
-            bullet = self.Bullet(self.rect.centerx, self.rect.top)
+            bullet = Bullet(self.rect.centerx, self.rect.top)
             self.all_sprites.add(bullet)
             self.bullets.add(bullet)
             self.shoot_sound.play().set_volume(0.15)
